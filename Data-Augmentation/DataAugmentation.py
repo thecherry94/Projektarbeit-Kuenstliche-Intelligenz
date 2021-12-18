@@ -6,44 +6,65 @@ class DataAugmentation:
     """
 
     defaultImageProcessingOptions = {
-        'translation': {
-            'active': True,
-            'iterations': 100,
+        'position': {
+            'translation': {
+                'active': True,
+                'iterations': 100,
+            },
+            'rotation': {
+                'active': True,
+                'iterations': 180
+            },
+            'cropping': {
+                'active': True,
+                'iterations': 25
+            },
+            'flipping': {
+                'active': True
+            },
+            'scaling': {
+                'active': True, 
+                'iterations': 25,
+                'min': 0.25,
+                'max': 3,
+            },
+            'shearing': {
+                'active': True, 
+                'iterations': 25,
+                'maxAngle': 3,
+            }             
         },
-        'rotation': {
-            'active': True,
-            'iterations': 180
+        'color': {
+            'brightness': {
+                'active': True,
+                'iterations': 25,
+                'min': 0.2,
+                'max': 2
+            },
+            'contrast': {
+                'active': True,
+                'iterations': 25
+            },
+            'saturation': {
+                'active': True,
+                'iterations': 25
+            },
+            'hue': {
+                'active': True,
+                'iterations': 25
+            }
         },
-        'cropping': {
-            'active': True,
-            'iterations': 25
-        },
-        'flipping': {
-            'active': True
-        },
-        'scaling': {
-            'active': True, 
-            'iterations': 25,
-            'min': 0.25,
-            'max': 3,
-        },
-        'brightness': {
-            'active': True,
-            'iterations': 25,
-            'min': 0.2,
-            'max': 2
-        },
-        'contrast': {
-            'active': True,
-            'iterations': 25
-        },
-        'saturation': {
-            'active': True,
-            'iterations': 25
-        },
-        'hue': {
-            'active': True,
-            'iterations': 25
+        'noise': {
+            'gaussian': {
+                'active': True,
+                'iterations': 25
+            },
+            'saltpepper': {
+                'active': True
+            },
+            'speckle': {
+                'active': True
+            }
         },
         'grayscale': True,
         'repeatForGrayscale': True
