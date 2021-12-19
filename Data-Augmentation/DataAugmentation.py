@@ -91,8 +91,10 @@ class DataAugmentation:
         """
 
         info = []
+        # Loop through all directory entries
         for entry in os.scandir(path):
             if entry.is_file:
+                # Only images are interesting
                 if entry.name.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
                     info.append({
                         'filename': entry.name,
@@ -102,8 +104,6 @@ class DataAugmentation:
                     })
 
         return info
-
-        pass
 
     def processImageBatch(self, batch, options=defaultImageProcessingOptions):
         """
