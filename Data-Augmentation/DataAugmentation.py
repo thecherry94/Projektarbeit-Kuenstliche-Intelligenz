@@ -93,7 +93,7 @@ class DataAugmentation:
         info = []
         # Loop through all directory entries
         for entry in os.scandir(path):
-            if entry.is_file:
+            if entry.is_file():
                 # Only images are interesting
                 if entry.name.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
                     info.append({
@@ -105,18 +105,19 @@ class DataAugmentation:
 
         return info
 
-    def analyzeImageDatabase(self, path):
+    def analyzeImageDatabase(self, path='..\\images'):
         """
         Scans the entire image database for subdirectories and extracts the requested information
         Returns tuple list with the absolute path of each subdirectory and information about each image inside the folders
         """
         directories = []
         for entry in os.scandir(path):
-            if entry.is_dir:
+            if entry.is_dir():
                 dirPath = path + '\\' + entry.name
+                print(dirPath)
                 directories.append((os.path.abspath(dirPath), self.analyzeDirectory(dirPath)))
 
-        pass
+        return directories
 
     def processImageBatch(self, batch, options=defaultImageProcessingOptions):
         """
