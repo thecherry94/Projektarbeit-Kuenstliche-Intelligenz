@@ -1,6 +1,7 @@
 import os
 import pathlib as pl
 from PIL import Image 
+import cv2
 
 class DataAugmentation:
     """
@@ -126,11 +127,18 @@ class DataAugmentation:
         """
         pass
 
+    def loadImageBatch(self, dir_info, i, batch_size=100):
+        """
+        Loads a batch of images of multiples of i * batch_size from the analyzeDirectory methods
+        """
+        pass
+
     def processImage(self, image, options=defaultImageProcessingOptions):
         """
         Processes a single image 
         Returns: Processed image
         """
+
         pass
 
     def makeBatches(self, directory_info, batch_size=100):
@@ -146,4 +154,19 @@ class DataAugmentation:
         Function expects to find different images of each class to classify in its own subdirectory and will generate new subdirectories for the new images
         """
         pass
+
+    def expand2square(self, pil_img, size, background_color):  
+        pil_img.thumbnail((size, size), Image.ANTIALIAS)
+        width, height = pil_img.size
+        if width == height:
+            return pil_img
+        elif width > height:
+            result = Image.new(pil_img.mode, (width, width), background_color)
+            result.paste(pil_img, (0, (width - height) // 2))
+            return result
+        else:
+            result = Image.new(pil_img.mode, (height, height), background_color)
+            result.paste(pil_img, ((height - width) // 2, 0))
+            return result
+
     pass
