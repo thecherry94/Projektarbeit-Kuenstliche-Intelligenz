@@ -78,7 +78,7 @@ class DataAugmentation:
         self.rescale_size = rescale_size
         pass
 
-    def analyzeDirectory(self, path, only_images=True):
+    def analyzeDirectory(self, path):
         """
         Analyzes the contents of a directory and outlines the most important information for each file.
         Returns an array with information for each directory. 
@@ -104,6 +104,19 @@ class DataAugmentation:
                     })
 
         return info
+
+    def analyzeImageDatabase(self, path):
+        """
+        Scans the entire image database for subdirectories and extracts the requested information
+        Returns tuple list with the absolute path of each subdirectory and information about each image inside the folders
+        """
+        directories = []
+        for entry in os.scandir(path):
+            if entry.is_dir:
+                dirPath = path + '\\' + entry.name
+                directories.append((os.path.abspath(dirPath), self.analyzeDirectory(dirPath)))
+
+        pass
 
     def processImageBatch(self, batch, options=defaultImageProcessingOptions):
         """
