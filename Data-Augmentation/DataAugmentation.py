@@ -127,12 +127,6 @@ class DataAugmentation:
         """
         pass
 
-    def loadImageBatch(self, dir_info, i, batch_size=100):
-        """
-        Loads a batch of images of multiples of i * batch_size from the analyzeDirectory methods
-        """
-        pass
-
     def processImage(self, image, options=defaultImageProcessingOptions):
         """
         Processes a single image 
