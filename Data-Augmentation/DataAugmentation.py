@@ -284,11 +284,7 @@ def rotation(img, angle):
 def rotations(img, steps): 
     return [rotation(img, angle) for angle in range(0, 360, int(360/steps))]
 
-
-
-
-def brightness(img, low, high):
-    value = random.uniform(low, high)
+def brightness(img, value):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hsv = np.array(hsv, dtype = np.float64)
     hsv[:,:,1] = hsv[:,:,1]*value
@@ -314,7 +310,6 @@ def zoom(img, value):
     return img
 
 def channel_shift(img, value):
-    value = int(random.uniform(-value, value))
     img = img + value
     img[:,:,:][img[:,:,:]>255]  = 255
     img[:,:,:][img[:,:,:]<0]  = 0
