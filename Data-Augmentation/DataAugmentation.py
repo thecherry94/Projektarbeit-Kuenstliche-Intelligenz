@@ -270,29 +270,32 @@ def generateRandomRatios(iterations=10, ratio=0.0):
     return [random.uniform(-ratio, ratio) for i in range(iterations)]
 
 
-def horizontalShift(img, ratios):
-        imgs = []
-        h, w = img.shape[:2]
-        for ratio in ratios:
-            trans_mat = np.float32([
-                    [1, 0, w*ratio],
-                    [0, 1, 0]
-            ])
-            imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
-        return imgs
+def horizontalShifts(img, ratios):
+    imgs = []
+    h, w = img.shape[:2]
+    for ratio in ratios:
+        trans_mat = np.float32([
+                [1, 0, w*ratio],
+                [0, 1, 0]
+        ])
+        imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
+    return imgs
 
 
-def verticalShift(img, ratios):
-        imgs = []
-        h, w = img.shape[:2]
-        for ratio in ratios:
-            trans_mat = np.float32([
-                    [1, 0, 0],
-                    [0, 1, h*ratio]
-            ])
-            imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
-        return imgs
+def verticalShifts(img, ratios):
+    imgs = []
+    h, w = img.shape[:2]
+    for ratio in ratios:
+        trans_mat = np.float32([
+                [1, 0, 0],
+                [0, 1, h*ratio]
+        ])
+        imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
+    return imgs
     
+
+def rotations(img, steps): 
+    return [rotation(img, angle) for angle in range(0, 360, int(360/steps))]
 
 
 def vertical_shift(img, ratio=0.0):
@@ -310,7 +313,6 @@ def vertical_shift(img, ratio=0.0):
     return img
 
 def rotation(img, angle):
-    angle = int(random.uniform(-angle, angle))
     h, w = img.shape[:2]
     M = cv2.getRotationMatrix2D((int(w/2), int(h/2)), angle, 1)
     img = cv2.warpAffine(img, M, (w, h))
