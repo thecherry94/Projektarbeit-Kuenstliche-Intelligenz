@@ -230,6 +230,22 @@ class DataAugmentation:
 
     pass
 
+
+# Generate a unique list of n floats with two decimal places
+def generateUniqueRandomRatios(iterations=100, ratio=1.0, decimals=2):
+    ratios = []
+    for i in range(iterations):
+        x = round(random.uniform(-ratio, ratio), decimals)
+        while x in ratios or x == 0:
+            x = round(random.uniform(-ratio, ratio), decimals)
+        ratios.append(x)
+    return ratios
+
+# Generates a uniform list of n floats with x decimal places
+def generateUniformRatios(iterations=10, ratio=1, decimals=2):
+    return [round(x, decimals) for x in np.arange(-ratio, ratio+ratio/iterations*2, ratio/iterations*2) if round(x, decimals) != 0]
+
+
 # https://towardsdatascience.com/complete-image-augmentation-in-opencv-31a6b02694f5
 def fill(img, h, w):
     img = cv2.resize(img, (h, w), cv2.INTER_CUBIC)
@@ -248,6 +264,38 @@ def horizontal_shift(img, ratio=0.0):
         img = img[:, int(-1*to_shift):, :]
     img = fill(img, h, w)
     return img
+
+
+def generateRandomRatios(iterations=10, ratio=0.0):
+    return [random.uniform(-ratio, ratio) for i in range(iterations)]
+
+
+def horizontalShift(img, ratio=0.0, iterations=10, decimals=2, uniform=True):
+        imgs = []
+        h, w = img.shape[:2]
+        gen_func = generateUniformRatios if uniform else generateUniqueRandomRatios
+        for ratio in gen_func(iterations, ratio, decimals):
+            trans_mat = np.float32([
+                    [1, 0, w*ratio],
+                    [0, 1, 0]
+            ])
+            imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
+        return imgs
+
+
+def verticalShift(img, ratio=0.0, iterations=10, decimals=2, uniform=True):
+        imgs = []
+        h, w = img.shape[:2]
+        gen_func = generateUniformRatios if uniform else generateUniqueRandomRatios
+        for ratio in gen_func(iterations, ratio, decimals):
+            trans_mat = np.float32([
+                    [1, 0, 0],
+                    [0, 1, h*ratio]
+            ])
+            imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
+        return imgs
+    
+
 
 def vertical_shift(img, ratio=0.0):
     if ratio > 1 or ratio < 0:
