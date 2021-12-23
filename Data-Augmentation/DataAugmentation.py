@@ -245,30 +245,13 @@ def generateUniqueRandomRatios(iterations=100, ratio=1.0, decimals=2):
 def generateUniformRatios(iterations=10, ratio=1, decimals=2):
     return [round(x, decimals) for x in np.arange(-ratio, ratio+ratio/iterations*2, ratio/iterations*2) if round(x, decimals) != 0]
 
-
 # https://towardsdatascience.com/complete-image-augmentation-in-opencv-31a6b02694f5
 def fill(img, h, w):
     img = cv2.resize(img, (h, w), cv2.INTER_CUBIC)
     return img
-        
-def horizontal_shift(img, ratio=0.0):
-    if ratio > 1 or ratio < 0:
-        print('Value should be less than 1 and greater than 0')
-        return img
-    ratio = random.uniform(-ratio, ratio)
-    h, w = img.shape[:2]
-    to_shift = w*ratio
-    if ratio > 0:
-        img = img[:, :int(w-to_shift), :]
-    if ratio < 0:
-        img = img[:, int(-1*to_shift):, :]
-    img = fill(img, h, w)
-    return img
-
 
 def generateRandomRatios(iterations=10, ratio=0.0):
     return [random.uniform(-ratio, ratio) for i in range(iterations)]
-
 
 def horizontalShifts(img, ratios):
     imgs = []
@@ -281,7 +264,6 @@ def horizontalShifts(img, ratios):
         imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
     return imgs
 
-
 def verticalShifts(img, ratios):
     imgs = []
     h, w = img.shape[:2]
@@ -292,31 +274,18 @@ def verticalShifts(img, ratios):
         ])
         imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
     return imgs
-    
-
-def rotations(img, steps): 
-    return [rotation(img, angle) for angle in range(0, 360, int(360/steps))]
-
-
-def vertical_shift(img, ratio=0.0):
-    if ratio > 1 or ratio < 0:
-        print('Value should be less than 1 and greater than 0')
-        return img
-    ratio = random.uniform(-ratio, ratio)
-    h, w = img.shape[:2]
-    to_shift = h*ratio
-    if ratio > 0:
-        img = img[:int(h-to_shift), :, :]
-    if ratio < 0:
-        img = img[int(-1*to_shift):, :, :]
-    img = fill(img, h, w)
-    return img
 
 def rotation(img, angle):
     h, w = img.shape[:2]
     M = cv2.getRotationMatrix2D((int(w/2), int(h/2)), angle, 1)
     img = cv2.warpAffine(img, M, (w, h))
     return img
+
+def rotations(img, steps): 
+    return [rotation(img, angle) for angle in range(0, 360, int(360/steps))]
+
+
+
 
 def brightness(img, low, high):
     value = random.uniform(low, high)
