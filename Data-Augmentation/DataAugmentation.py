@@ -270,11 +270,10 @@ def generateRandomRatios(iterations=10, ratio=0.0):
     return [random.uniform(-ratio, ratio) for i in range(iterations)]
 
 
-def horizontalShift(img, ratio=0.0, iterations=10, decimals=2, uniform=True):
+def horizontalShift(img, ratios):
         imgs = []
         h, w = img.shape[:2]
-        gen_func = generateUniformRatios if uniform else generateUniqueRandomRatios
-        for ratio in gen_func(iterations, ratio, decimals):
+        for ratio in ratios:
             trans_mat = np.float32([
                     [1, 0, w*ratio],
                     [0, 1, 0]
@@ -283,11 +282,10 @@ def horizontalShift(img, ratio=0.0, iterations=10, decimals=2, uniform=True):
         return imgs
 
 
-def verticalShift(img, ratio=0.0, iterations=10, decimals=2, uniform=True):
+def verticalShift(img, ratios):
         imgs = []
         h, w = img.shape[:2]
-        gen_func = generateUniformRatios if uniform else generateUniqueRandomRatios
-        for ratio in gen_func(iterations, ratio, decimals):
+        for ratio in ratios:
             trans_mat = np.float32([
                     [1, 0, 0],
                     [0, 1, h*ratio]
