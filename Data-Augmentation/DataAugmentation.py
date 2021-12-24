@@ -166,26 +166,14 @@ class DataAugmentation:
         Processes all images inside the given directory. 
         Function expects to find different images of each class to classify in its own subdirectory and will generate new subdirectories for the new images
         """
-        pass
+        pass 
 
-    def expand2square(self, pil_img, size, background_color):  
-        """
-        deprecated
-        """
-        pil_img.thumbnail((size, size), Image.ANTIALIAS)
-        width, height = pil_img.size
-        if width == height:
-            return pil_img
-        elif width > height:
-            result = Image.new(pil_img.mode, (width, width), background_color)
-            result.paste(pil_img, (0, (width - height) // 2))
-            return result
-        else:
-            result = Image.new(pil_img.mode, (height, height), background_color)
-            result.paste(pil_img, ((height - width) // 2, 0))
-            return result
-    
-    def resizeAndPad(self, img, size, padColor=0):
+    pass
+
+class ImageManipulation:
+
+    @staticmethod
+    def resizeAndPad(img, size, padColor=0):
         """
         https://stackoverflow.com/questions/44720580/resize-image-canvas-to-maintain-square-aspect-ratio-in-python-opencv
         """
@@ -228,124 +216,134 @@ class DataAugmentation:
 
         return scaled_img
 
-    pass
-
-
-# Generate a unique list of n floats with two decimal places
-def generateUniqueRandomRatios(iterations=100, ratio=1.0, decimals=2):
-    ratios = []
-    for i in range(iterations):
-        x = round(random.uniform(-ratio, ratio), decimals)
-        while x in ratios or x == 0:
+    # Generate a unique list of n floats with two decimal places
+    @staticmethod
+    def generateUniqueRandomRatios(iterations=100, ratio=1.0, decimals=2):
+        ratios = []
+        for i in range(iterations):
             x = round(random.uniform(-ratio, ratio), decimals)
-        ratios.append(x)
-    return ratios
+            while x in ratios or x == 0:
+                x = round(random.uniform(-ratio, ratio), decimals)
+            ratios.append(x)
+        return ratios
 
-# Generates a uniform list of n floats with x decimal places
-def generateUniformRatios(iterations=10, ratio=1, decimals=2):
-    return [round(x, decimals) for x in np.arange(-ratio, ratio+ratio/iterations*2, ratio/iterations*2) if round(x, decimals) != 0]
+    # Generates a uniform list of n floats with x decimal places
+    @staticmethod
+    def generateUniformRatios(iterations=10, ratio=1, decimals=2):
+        return [round(x, decimals) for x in np.arange(-ratio, ratio+ratio/iterations*2, ratio/iterations*2) if round(x, decimals) != 0]
 
-# https://towardsdatascience.com/complete-image-augmentation-in-opencv-31a6b02694f5
-def fill(img, h, w):
-    img = cv2.resize(img, (h, w), cv2.INTER_CUBIC)
-    return img
-
-def generateRandomRatios(iterations=10, ratio=0.0):
-    return [random.uniform(-ratio, ratio) for i in range(iterations)]
-
-def horizontalShifts(img, ratios):
-    imgs = []
-    h, w = img.shape[:2]
-    for ratio in ratios:
-        trans_mat = np.float32([
-                [1, 0, w*ratio],
-                [0, 1, 0]
-        ])
-        imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
-    return imgs
-
-def verticalShifts(img, ratios):
-    imgs = []
-    h, w = img.shape[:2]
-    for ratio in ratios:
-        trans_mat = np.float32([
-                [1, 0, 0],
-                [0, 1, h*ratio]
-        ])
-        imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
-    return imgs
-
-def rotation(img, angle):
-    h, w = img.shape[:2]
-    M = cv2.getRotationMatrix2D((int(w/2), int(h/2)), angle, 1)
-    img = cv2.warpAffine(img, M, (w, h))
-    return img
-
-def rotations(img, steps): 
-    return [rotation(img, angle) for angle in range(0, 360, int(360/steps))]
-
-def brightness(img, value):
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    hsv = np.array(hsv, dtype = np.float64)
-    hsv[:,:,1] = hsv[:,:,1]*value
-    hsv[:,:,1][hsv[:,:,1]>255]  = 255
-    hsv[:,:,2] = hsv[:,:,2]*value 
-    hsv[:,:,2][hsv[:,:,2]>255]  = 255
-    hsv = np.array(hsv, dtype = np.uint8)
-    img = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-    return img
-
-def zoom(img, value):
-    if value > 1 or value < 0:
-        print('Value for zoom should be less than 1 and greater than 0')
+    # https://towardsdatascience.com/complete-image-augmentation-in-opencv-31a6b02694f5
+    @staticmethod
+    def fill(img, h, w):
+        img = cv2.resize(img, (h, w), cv2.INTER_CUBIC)
         return img
-    value = random.uniform(value, 1)
-    h, w = img.shape[:2]
-    h_taken = int(value*h)
-    w_taken = int(value*w)
-    h_start = random.randint(0, h-h_taken)
-    w_start = random.randint(0, w-w_taken)
-    img = img[h_start:h_start+h_taken, w_start:w_start+w_taken, :]
-    img = fill(img, h, w)
-    return img
 
-def channel_shift(img, value):
-    img = img + value
-    img[:,:,:][img[:,:,:]>255]  = 255
-    img[:,:,:][img[:,:,:]<0]  = 0
-    img = img.astype(np.uint8)
-    return img
+    @staticmethod
+    def generateRandomRatios(iterations=10, ratio=0.0):
+        return [random.uniform(-ratio, ratio) for i in range(iterations)]
 
-def noise_sp(image, ratio):
-    output = np.zeros(image.shape,np.uint8)
-    thres = 1 - ratio 
-    for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            rdn = random.random()
-            if rdn < ratio:
-                output[i][j] = 0
-            elif rdn > thres:
-                output[i][j] = 255
-            else:
-                output[i][j] = image[i][j]
-    return output
+    @staticmethod
+    def horizontalShifts(img, ratios):
+        imgs = []
+        h, w = img.shape[:2]
+        for ratio in ratios:
+            trans_mat = np.float32([
+                    [1, 0, w*ratio],
+                    [0, 1, 0]
+            ])
+            imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
+        return imgs
 
+    @staticmethod
+    def verticalShifts(img, ratios):
+        imgs = []
+        h, w = img.shape[:2]
+        for ratio in ratios:
+            trans_mat = np.float32([
+                    [1, 0, 0],
+                    [0, 1, h*ratio]
+            ])
+            imgs.append(cv2.warpAffine(img, trans_mat, img.shape[:2]))
+        return imgs
 
-def noise_gauss(image, mean=0, var=0.001):
-    image = np.array(image/255, dtype=float)
-    noise = np.random.normal(mean, var ** 0.5, image.shape)
-    out = image + noise
-    if out.min() < 0:
-        low_clip = -1.
-    else:
-        low_clip = 0.
-    out = np.clip(out, low_clip, 1.0)
-    out = np.uint8(out*255)
-    #cv.imshow("gasuss", out)
-    return out
+    @staticmethod
+    def rotation(img, angle):
+        h, w = img.shape[:2]
+        M = cv2.getRotationMatrix2D((int(w/2), int(h/2)), angle, 1)
+        img = cv2.warpAffine(img, M, (w, h))
+        return img
 
-def noise_speckle(image, a=0, b=1):
-    gauss = np.random.normal(a, b, image.size)
-    gauss = gauss.reshape(image.shape[0], image.shape[1], image.shape[2]).astype('uint8')
-    noise = image + image * gauss
-    return noise
+    @staticmethod
+    def rotations(img, steps): 
+        return [ImageManipulation.rotation(img, angle) for angle in range(0, 360, int(360/steps))]
+
+    @staticmethod
+    def brightness(img, value):
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hsv = np.array(hsv, dtype = np.float64)
+        hsv[:,:,1] = hsv[:,:,1]*value
+        hsv[:,:,1][hsv[:,:,1]>255]  = 255
+        hsv[:,:,2] = hsv[:,:,2]*value 
+        hsv[:,:,2][hsv[:,:,2]>255]  = 255
+        hsv = np.array(hsv, dtype = np.uint8)
+        img = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+        return img
+
+    @staticmethod
+    def zoom(img, value):
+        if value > 1 or value < 0:
+            print('Value for zoom should be less than 1 and greater than 0')
+            return img
+        value = random.uniform(value, 1)
+        h, w = img.shape[:2]
+        h_taken = int(value*h)
+        w_taken = int(value*w)
+        h_start = random.randint(0, h-h_taken)
+        w_start = random.randint(0, w-w_taken)
+        img = img[h_start:h_start+h_taken, w_start:w_start+w_taken, :]
+        img = ImageManipulation.fill(img, h, w)
+        return img
+
+    @staticmethod
+    def channel_shift(img, value):
+        img = img + value
+        img[:,:,:][img[:,:,:]>255]  = 255
+        img[:,:,:][img[:,:,:]<0]  = 0
+        img = img.astype(np.uint8)
+        return img
+
+    @staticmethod
+    def noise_sp(image, ratio):
+        output = np.zeros(image.shape,np.uint8)
+        thres = 1 - ratio 
+        for i in range(image.shape[0]):
+            for j in range(image.shape[1]):
+                rdn = random.random()
+                if rdn < ratio:
+                    output[i][j] = 0
+                elif rdn > thres:
+                    output[i][j] = 255
+                else:
+                    output[i][j] = image[i][j]
+        return output
+
+    @staticmethod
+    def noise_gauss(image, mean=0, var=0.001):
+        image = np.array(image/255, dtype=float)
+        noise = np.random.normal(mean, var ** 0.5, image.shape)
+        out = image + noise
+        if out.min() < 0:
+            low_clip = -1.
+        else:
+            low_clip = 0.
+        out = np.clip(out, low_clip, 1.0)
+        out = np.uint8(out*255)
+        #cv.imshow("gasuss", out)
+        return out
+
+    @staticmethod
+    def noise_speckle(image, a=0, b=1):
+        gauss = np.random.normal(a, b, image.size)
+        gauss = gauss.reshape(image.shape[0], image.shape[1], image.shape[2]).astype('uint8')
+        noise = image + image * gauss
+        return noise
