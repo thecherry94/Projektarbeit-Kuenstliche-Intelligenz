@@ -224,7 +224,7 @@ class DataAugmentation:
 
         # scale and pad
         scaled_img = cv2.resize(img, (new_w, new_h), interpolation=interp)
-        scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
+        scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_REPLICATE, value=padColor)
 
         return scaled_img
 
@@ -315,3 +315,37 @@ def channel_shift(img, value):
     img[:,:,:][img[:,:,:]<0]  = 0
     img = img.astype(np.uint8)
     return img
+
+def noise_sp(image, ratio):
+    output = np.zeros(image.shape,np.uint8)
+    thres = 1 - ratio 
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            rdn = random.random()
+            if rdn < ratio:
+                output[i][j] = 0
+            elif rdn > thres:
+                output[i][j] = 255
+            else:
+                output[i][j] = image[i][j]
+    return output
+
+
+def noise_gauss(image, mean=0, var=0.001):
+    image = np.array(image/255, dtype=float)
+    noise = np.random.normal(mean, var ** 0.5, image.shape)
+    out = image + noise
+    if out.min() < 0:
+        low_clip = -1.
+    else:
+        low_clip = 0.
+    out = np.clip(out, low_clip, 1.0)
+    out = np.uint8(out*255)
+    #cv.imshow("gasuss", out)
+    return out
+
+def noise_speckle(image, a=0, b=1):
+    gauss = np.random.normal(a, b, image.size)
+    gauss = gauss.reshape(image.shape[0], image.shape[1], image.shape[2]).astype('uint8')
+    noise = image + image * gauss
+    return noise
