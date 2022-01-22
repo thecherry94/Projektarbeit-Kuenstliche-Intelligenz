@@ -161,12 +161,50 @@ class DataAugmentation:
         """
         pass
 
-    def process(self, path='..\\images', options={'imageProcessing': defaultImageProcessingOptions}):
+    @staticmethod
+    def process(path='..\\images', options={'imageProcessing': defaultImageProcessingOptions}):
         """
         Processes all images inside the given directory. 
         Function expects to find different images of each class to classify in its own subdirectory and will generate new subdirectories for the new images
         """
-        pass 
+
+        relImgPath = os.path.join("data", "images", "original")
+        imgPaths = []
+        for dirpath, dirnames, filenames in os.walk(relImgPath):
+            if dirnames:
+                classes = {}
+                for index, name in enumerate(dirnames):
+                    classes[name]=index
+            for filename in filenames:# [f for f in filenames if f.endswith(suportedImgFomats)]:
+                print(filename)
+                path = os.path.join(dirpath, filename)
+                augpath = path.replace("original", "augmented")
+
+                image = cv2.imread(path, cv2.COLOR_BGR2RGB)
+                auglist = []
+                image = ImageManipulation.resizeAndPad(image, (256, 256))
+                auglist.append(image)
+                ratios = ImageManipulation.generateUniqueRandomRatios(5)
+                
+
+                auglist.extend(ImageManipulation.verticalShifts(image, ratios))
+                auglist.extend(ImageManipulation.horizontalShifts(image, ratios))
+                auglist.extend(ImageManipulation.rotations(image, len(ratios)))
+                for ratio in ratios:
+                    auglist.append(ImageManipulation.brightness(image, ratio + 1))
+                
+                for ratio in ratios:
+                    auglist.append(ImageManipulation.noise_sp(image, ratio))
+
+                auglist.append(cv2.flip(image, 0))
+                auglist.append(cv2.flip(image, 1))
+
+                for idx, augim in enumerate(auglist):
+                    dot = augpath.index('.')
+                    augname = augpath[:dot] + str(idx) + augpath[dot:]
+                    print(augname)
+                    cv2.imwrite(augname, np.array(augim))
+        
 
     pass
 
