@@ -182,16 +182,16 @@ class DataAugmentation:
 
                 image = cv2.imread(path, cv2.COLOR_BGR2RGB)
                 auglist = []
-                image = ImageManipulation.resizeAndPad(image, (256, 256))
+                image = ImageManipulation.resizeAndPad(image, (32, 32))
                 auglist.append(image)
-                ratios = ImageManipulation.generateUniqueRandomRatios(5)
+                ratios = ImageManipulation.generateUniqueRandomRatios(15, 0.5)
                 
 
                 auglist.extend(ImageManipulation.verticalShifts(image, ratios))
                 auglist.extend(ImageManipulation.horizontalShifts(image, ratios))
                 auglist.extend(ImageManipulation.rotations(image, len(ratios)))
                 for ratio in ratios:
-                    auglist.append(ImageManipulation.brightness(image, ratio + 1))
+                    auglist.append(ImageManipulation.brightness(image, ratio + 0.5))
                 
                 for ratio in ratios:
                     auglist.append(ImageManipulation.noise_sp(image, ratio))
