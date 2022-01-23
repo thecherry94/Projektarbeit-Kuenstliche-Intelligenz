@@ -183,17 +183,38 @@ class DataAugmentation:
                 auglist = []
                 image = resizeAndPad(image, (32, 32))
                 auglist.append(image)
-                ratios = generateUniqueRandomRatios(15, 0.5)
+                #ratios = generateUniqueRandomRatios(15, 0.5)
                 
 
-                auglist.extend(verticalShifts(image, ratios))
-                auglist.extend(horizontalShifts(image, ratios))
-                auglist.extend(rotations(image, len(ratios)))
-                for ratio in ratios:
-                    auglist.append(brightness(image, ratio + 0.5))
+
+                shiftRatios = generateUniqueRandomRatios(15, 0.33)
+                brightnessRatios = generateUniqueRandomRatios(15, 0.33)
+                saltPepperNoiseRatios = generateUniqueRandomRatios(20, 0.33, decimals=4, onlyPositive=True)
+                zoomRatios = [0.5 for i in range(10)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
+                channelShiftRatios = generateUniqueRandomRatios(25, 0.2, decimals=3, onlyPositive=True)
+                speckleNoiseRatios = generateUniqueRandomRatios(25, 0.05, decimals=5, onlyPositive=True)
+                numRotations = 6
+
+
+                auglist.extend(verticalShifts(image, shiftRatios))
+                auglist.extend(horizontalShifts(image, shiftRatios))
+                auglist.extend(rotations(image, numRotations))
+
+                for ratio in brightnessRatios:
+                    auglist.append(brightness(image, ratio))
                 
-                for ratio in ratios:
-                    auglist.append(noise_sp(image, ratio * 0.66))
+                for ratio in saltPepperNoiseRatios:
+                    auglist.append(noise_sp(image, ratio))
+
+                for ratio in zoomRatios:
+                    auglist.append(zoom(image, ratio))
+
+                for ratio in channelShiftRatios:
+                    auglist.append(channel_shift(image, ratio))
+
+                for ratio in speckleNoiseRatios:
+                    auglist.append(noise_speckle(image, ratio))
+
 
                 auglist.append(cv2.flip(image, 0))
                 auglist.append(cv2.flip(image, 1))
@@ -251,12 +272,12 @@ def resizeAndPad(img, size, padColor=0):
 
 # Generate a unique list of n floats with two decimal places
 
-def generateUniqueRandomRatios(iterations=100, ratio=1.0, decimals=2):
+def generateUniqueRandomRatios(iterations=10, ratio=1.0, decimals=2, onlyPositive=False):
     ratios = []
     for i in range(iterations):
-        x = round(random.uniform(-ratio, ratio), decimals)
+        x = round(random.uniform(0 if onlyPositive else -ratio, ratio), decimals)
         while x in ratios or x == 0:
-            x = round(random.uniform(-ratio, ratio), decimals)
+            x = round(random.uniform(0 if onlyPositive else -ratio, ratio), decimals)
         ratios.append(x)
     return ratios
 
