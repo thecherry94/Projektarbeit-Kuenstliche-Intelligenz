@@ -183,46 +183,44 @@ class DataAugmentation:
                 auglist = []
                 image = resizeAndPad(image, (32, 32))
                 auglist.append(image)
-                #ratios = generateUniqueRandomRatios(15, 0.5)
-                
-
-
-                shiftRatios = generateUniqueRandomRatios(15, 0.33)
-                brightnessRatios = generateUniqueRandomRatios(15, 0.33)
-                saltPepperNoiseRatios = generateUniqueRandomRatios(20, 0.33, decimals=4, onlyPositive=True)
-                zoomRatios = [0.5 for i in range(10)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
-                channelShiftRatios = generateUniqueRandomRatios(25, 0.2, decimals=3, onlyPositive=True)
-                speckleNoiseRatios = generateUniqueRandomRatios(25, 0.05, decimals=5, onlyPositive=True)
-                numRotations = 6
-
-
-                auglist.extend(verticalShifts(image, shiftRatios))
-                auglist.extend(horizontalShifts(image, shiftRatios))
-                auglist.extend(rotations(image, numRotations))
-
-                for ratio in brightnessRatios:
-                    auglist.append(brightness(image, ratio))
-                
-                for ratio in saltPepperNoiseRatios:
-                    auglist.append(noise_sp(image, ratio))
-
-                for ratio in zoomRatios:
-                    auglist.append(zoom(image, ratio))
-
-                for ratio in channelShiftRatios:
-                    auglist.append(channel_shift(image, ratio))
-
-                for ratio in speckleNoiseRatios:
-                    auglist.append(noise_speckle(image, ratio))
-
-
                 auglist.append(cv2.flip(image, 0))
                 auglist.append(cv2.flip(image, 1))
+                #ratios = generateUniqueRandomRatios(15, 0.5)
+                
+                numRotations = 9
+                rotlist = rotations(image, numRotations)
 
-                for idx, augim in enumerate(auglist):
-                    dot = augpath.index('.')
-                    augname = augpath[:dot] + str(idx) + augpath[dot:]
-                    cv2.imwrite(augname, np.array(augim))           
+                for rot in rotlist:
+                    auglist.append(rot)
+                    shiftRatios = generateUniqueRandomRatios(15, 0.33)
+                    brightnessRatios = generateUniqueRandomRatios(15, 0.33)
+                    saltPepperNoiseRatios = generateUniqueRandomRatios(20, 0.33, decimals=4, onlyPositive=True)
+                    zoomRatios = [0.5 for i in range(10)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
+                    channelShiftRatios = generateUniqueRandomRatios(25, 0.2, decimals=3, onlyPositive=True)
+                    speckleNoiseRatios = generateUniqueRandomRatios(25, 0.05, decimals=5, onlyPositive=True)
+
+                    auglist.extend(verticalShifts(rot, shiftRatios))
+                    auglist.extend(horizontalShifts(rot, shiftRatios))
+
+                    for ratio in brightnessRatios:
+                        auglist.append(brightness(rot, ratio))
+                    
+                    for ratio in saltPepperNoiseRatios:
+                        auglist.append(noise_sp(rot, ratio))
+
+                    for ratio in zoomRatios:
+                        auglist.append(zoom(rot, ratio))
+
+                    for ratio in channelShiftRatios:
+                        auglist.append(channel_shift(rot, ratio))
+
+                    for ratio in speckleNoiseRatios:
+                        auglist.append(noise_speckle(rot, ratio))              
+    
+                    for idx, augim in enumerate(auglist):
+                        dot = augpath.index('.')
+                        augname = augpath[:dot] + str(idx) + augpath[dot:]
+                        cv2.imwrite(augname, np.array(augim))           
         
 
     pass
