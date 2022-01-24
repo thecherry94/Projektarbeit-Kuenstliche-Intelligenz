@@ -170,8 +170,12 @@ class DataAugmentation:
 
         relImgPath = os.path.join("data", "images", "original")
         imgPaths = []
-        for dirpath, dirnames, filenames in os.walk(relImgPath):
-            if dirnames:
+
+        grandlist = [[], [], [], []]
+        idxgrand = 0
+
+        for dirpath, dirnames, filenames in os.walk(relImgPath):     
+            if dirnames:            
                 classes = {}
                 for index, name in enumerate(dirnames):
                     classes[name]=index
@@ -192,12 +196,12 @@ class DataAugmentation:
 
                 for rot in rotlist:
                     auglist.append(rot)
-                    shiftRatios = generateUniqueRandomRatios(15, 0.33)
-                    brightnessRatios = generateUniqueRandomRatios(15, 0.33)
-                    saltPepperNoiseRatios = generateUniqueRandomRatios(20, 0.33, decimals=4, onlyPositive=True)
-                    zoomRatios = [0.5 for i in range(10)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
-                    channelShiftRatios = generateUniqueRandomRatios(25, 0.2, decimals=3, onlyPositive=True)
-                    speckleNoiseRatios = generateUniqueRandomRatios(25, 0.05, decimals=5, onlyPositive=True)
+                    shiftRatios = generateUniqueRandomRatios(5, 0.4)
+                    brightnessRatios = generateUniqueRandomRatios(5, 0.4)
+                    saltPepperNoiseRatios = generateUniqueRandomRatios(8, 0.25, decimals=4, onlyPositive=True)
+                    zoomRatios = [0.5 for i in range(8)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
+                    channelShiftRatios = generateUniqueRandomRatios(8, 0.15, decimals=3, onlyPositive=True)
+                    speckleNoiseRatios = generateUniqueRandomRatios(8, 0.05, decimals=5, onlyPositive=True)
 
                     auglist.extend(verticalShifts(rot, shiftRatios))
                     auglist.extend(horizontalShifts(rot, shiftRatios))
@@ -216,11 +220,21 @@ class DataAugmentation:
 
                     for ratio in speckleNoiseRatios:
                         auglist.append(noise_speckle(rot, ratio))              
-    
+
+                    """
                     for idx, augim in enumerate(auglist):
                         dot = augpath.index('.')
                         augname = augpath[:dot] + str(idx) + augpath[dot:]
-                        cv2.imwrite(augname, np.array(augim))           
+                        cv2.imwrite(augname, np.array(augim))
+                    """
+
+                    grandlist[idxgrand].extend(auglist)
+            if len(filenames) > 0:
+                grandlist[idxgrand] = np.array(grandlist[idxgrand])
+                idxgrand += 1
+
+        grandlist = np.array(grandlist)
+        np.save(r'data/images/augmented/augmentation.npy', grandlist, allow_pickle=True)                       
         
 
     pass
