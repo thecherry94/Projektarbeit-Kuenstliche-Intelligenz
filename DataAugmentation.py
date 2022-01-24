@@ -172,10 +172,11 @@ class DataAugmentation:
         imgPaths = []
 
         grandlist = [[], [], [], []]
+        originalList = [[], [], [], []]
         idxgrand = 0
 
         for dirpath, dirnames, filenames in os.walk(relImgPath):     
-            if dirnames:            
+            if dirnames:          
                 classes = {}
                 for index, name in enumerate(dirnames):
                     classes[name]=index
@@ -187,6 +188,7 @@ class DataAugmentation:
                 auglist = []
                 image = resizeAndPad(image, (32, 32))
                 auglist.append(image)
+                originalList[idxgrand].append(image)
                 auglist.append(cv2.flip(image, 0))
                 auglist.append(cv2.flip(image, 1))
                 #ratios = generateUniqueRandomRatios(15, 0.5)
@@ -221,20 +223,17 @@ class DataAugmentation:
                     for ratio in speckleNoiseRatios:
                         auglist.append(noise_speckle(rot, ratio))              
 
-                    """
-                    for idx, augim in enumerate(auglist):
-                        dot = augpath.index('.')
-                        augname = augpath[:dot] + str(idx) + augpath[dot:]
-                        cv2.imwrite(augname, np.array(augim))
-                    """
-
                     grandlist[idxgrand].extend(auglist)
+                    
             if len(filenames) > 0:
                 grandlist[idxgrand] = np.array(grandlist[idxgrand])
+                originalList[idxgrand] = np.array(originalList[idxgrand])
                 idxgrand += 1
 
         grandlist = np.array(grandlist)
-        np.save(r'data/images/augmented/augmentation.npy', grandlist, allow_pickle=True)                       
+        originalList = np.array(originalList)
+        np.save(r'data/images/augmented/augmentation.npy', grandlist, allow_pickle=True)
+        np.save(r'data/images/augmented/original.npy', originalList, allow_pickle=True)                          
         
 
     pass
