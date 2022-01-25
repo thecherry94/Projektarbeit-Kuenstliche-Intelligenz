@@ -4,6 +4,7 @@ from PIL import Image
 import cv2
 import numpy as np
 import random
+import pickle
 
 class DataAugmentation:
     """
@@ -193,16 +194,16 @@ class DataAugmentation:
                 auglist.append(cv2.flip(image, 1))
                 #ratios = generateUniqueRandomRatios(15, 0.5)
                 
-                numRotations = 9
+                numRotations = 12
                 rotlist = rotations(image, numRotations)
 
                 for rot in rotlist:
                     auglist.append(rot)
                     shiftRatios = generateUniqueRandomRatios(5, 0.4)
-                    brightnessRatios = generateUniqueRandomRatios(5, 0.4)
+                    brightnessRatios = generateUniqueRandomRatios(10, 0.4)
                     saltPepperNoiseRatios = generateUniqueRandomRatios(8, 0.25, decimals=4, onlyPositive=True)
-                    zoomRatios = [0.5 for i in range(8)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
-                    channelShiftRatios = generateUniqueRandomRatios(8, 0.15, decimals=3, onlyPositive=True)
+                    zoomRatios = [0.5 for i in range(15)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
+                    channelShiftRatios = generateUniqueRandomRatios(15, 0.15, decimals=3, onlyPositive=True)
                     speckleNoiseRatios = generateUniqueRandomRatios(8, 0.05, decimals=5, onlyPositive=True)
 
                     auglist.extend(verticalShifts(rot, shiftRatios))
@@ -232,7 +233,9 @@ class DataAugmentation:
 
         grandlist = np.array(grandlist)
         originalList = np.array(originalList)
-        np.save(r'data/images/augmented/augmentation.npy', grandlist, allow_pickle=True)
+        with open(r'data/images/augmented/augmentation.npy', 'wb') as f:
+            pickle.dump(grandlist, f, protocol=4)
+        #np.save(r'data/images/augmented/augmentation.npy', grandlist, allow_pickle=True)
         np.save(r'data/images/augmented/original.npy', originalList, allow_pickle=True)                          
         
 
