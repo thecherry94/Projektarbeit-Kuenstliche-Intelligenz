@@ -66,3 +66,5 @@
 
 
 *.mp4
+data/images/augmented/original.npy
+data/images/augmented/augmentation.npy
