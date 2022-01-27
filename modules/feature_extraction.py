@@ -4,7 +4,8 @@ This file provides functions to extract features out of object images for
 classification and save them in a csv file.
 """
 import numpy as np
-import cv2, imutils, math
+import cv2 
+import math
 from imutils import perspective
 
 
@@ -102,7 +103,7 @@ def aspect_ratio(img):
     
     # Calculate the minimum bounding box's corner coordinates
     box = cv2.minAreaRect(max_cntr)
-    box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
+    box = cv2.boxPoints(box)
     box = np.array(box, dtype="int")
     box = perspective.order_points(box)
     
