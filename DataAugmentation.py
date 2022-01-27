@@ -1,245 +1,109 @@
 import os
-import pathlib as pl
-from PIL import Image 
 import cv2
 import numpy as np
 import random
 import pickle
 
-class DataAugmentation:
-    """
-    Handles all data augmentation jobs
-    """
+def trainTestSplit(data, labels, ratio):
+    return ((data[:int(len(data)*ratio)], labels[:int(len(data)*ratio)]), (data[int(len(data)*ratio):], labels[int(len(data)*ratio):]))
 
-    defaultImageProcessingOptions = {
-        'position': {
-            'translation': {
-                'active': True,
-                'iterations': 10,
-            },
-            'rotation': {
-                'active': True,
-                'iterations': 90
-            },
-            'cropping': {
-                'active': True,
-                'iterations': 50
-            },
-            'flipping': {
-                'active': True
-            },
-            'scaling': {
-                'active': True, 
-                'iterations': 50,
-                'min': 0.25,
-                'max': 3,
-            },
-            'shearing': {
-                'active': True, 
-                'iterations': 50,
-                'maxAngle': 3,
-            }             
-        },
-        'color': {
-            'brightness': {
-                'active': True,
-                'iterations': 50,
-                'min': 0.2,
-                'max': 2
-            },
-            'contrast': {
-                'active': True,
-                'iterations': 50
-            },
-            'saturation': {
-                'active': True,
-                'iterations': 50
-            },
-            'hue': {
-                'active': True,
-                'iterations': 50
-            }
-        },
-        'noise': {
-            'gaussian': {
-                'active': True,
-                'iterations': 50
-            },
-            'saltpepper': {
-                'active': True,
-                'iterations': 50
-            },
-            'speckle': {
-                'active': True,
-                'iterations': 50
-            }
-        },
-        'grayscale': True,
-        'repeatForGrayscale': True
-    }
+def loadAndPrepareAugmentedData():
+    dataset = np.load(r'data/images/augmented/augmentation.npy', allow_pickle=True)
 
-    def __init__(self, rescale_size=256) -> None: 
-        self.rescale_size = rescale_size
-        pass
+    images = []
+    labels = []
 
-    def analyzeDirectory(self, path):
-        """
-        Analyzes the contents of a directory and outlines the most important information for each file.
-        Returns an array with information for each directory. 
-        Each directory information contains another array with a list of each file.
-        The information for each file is stored in a dictionary with the following structure:
-            - filename
-            - type (jpeg, png, etc...)
-            - dimensions (width/height tuple)
-            - file size (in kB)
-        """
+    for idx, d in enumerate(dataset):
+        images.extend(d)
+        for e in d:
+            labels.append([idx])
+    
+    return (np.array(images), np.array(labels))
 
-        info = []
-        # Loop through all directory entries
-        for entry in os.scandir(path):
-            if entry.is_file():
-                # Only images are interesting
-                if entry.name.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
-                    info.append({
-                        'filename': entry.name,
-                        'type': pl.Path(entry).suffix[1:],
-                        'dimensions': Image.open(os.path.abspath(path + '\\' + entry.name)).size,
-                        'size': entry.stat().st_size / 1024
-                    })
 
-        return info
+def loadAndPrepareOriginalData():
+    original = np.load(r'data/images/augmented/original.npy', allow_pickle=True)
 
-    def analyzeImageDatabase(self, path='..\\images'):
-        """
-        Scans the entire image database for subdirectories and extracts the requested information
-        Returns tuple list with the absolute path of each subdirectory and information about each image inside the folders
-        """
-        directories = []
-        for entry in os.scandir(path):
-            if entry.is_dir():
-                dirPath = path + '\\' + entry.name
-                directories.append((os.path.abspath(dirPath), self.analyzeDirectory(dirPath)))
+    original_images = []
+    original_labels = []
 
-        return directories
+    for idx, d in enumerate(original):
+        original_images.extend(d)
+        for e in d:
+            original_labels.append([idx])
 
-    def processImageBatch(self, batch, options=defaultImageProcessingOptions):
-        """
-        Processes a batch of images 
-        Returns: Processed images as a list
-        """
-        pass
+    return (np.array(original_images), np.array(original_labels))
 
-    def processImage(self, img, options=defaultImageProcessingOptions):
-        """
-        Processes a single image 
-        Returns: Processed image
-        """
+def process(image_size=32):
+    relImgPath = os.path.join("data", "images", "original")
+    imgPaths = []
 
-        new_img = {}
+    grandlist = [[], [], [], []]
+    originalList = [[], [], [], []]
+    idxgrand = 0
 
-        for k, v in options['position']:
-            if v['active']:
-                if k == 'translation':
-                    n = v['iterations']
-                    img.transform(img.size, Image.AFFINE, )
-                elif k == 'rotation':
-                    n = v['iterations']
-                elif k == 'cropping':
-                    n = v['iterations']
-                elif k == 'flipping':
-                    n = v['iterations']
-                elif k == 'scaling':
-                    n = v['iterations']
-                elif k == 'shearing':
-                    n = v['iterations']
+    for dirpath, dirnames, filenames in os.walk(relImgPath):     
+        if dirnames:          
+            classes = {}
+            for index, name in enumerate(dirnames):
+                classes[name]=index
+        for filename in filenames:# [f for f in filenames if f.endswith(suportedImgFomats)]:
+            path = os.path.join(dirpath, filename)
+            augpath = path.replace("original", "augmented")
 
-        pass
+            image = cv2.imread(path, cv2.COLOR_BGR2RGB)
+            auglist = []
+            image = resizeAndPad(image, (image_size, image_size))
+            auglist.append(image)
+            originalList[idxgrand].append(image)
+            auglist.append(cv2.flip(image, 0))
+            auglist.append(cv2.flip(image, 1))
+            #ratios = generateUniqueRandomRatios(15, 0.5)
+            
+            numRotations = 6
+            rotlist = rotations(image, numRotations)
 
-    def makeBatches(self, directory_info, batch_size=100):
-        """
-        Uses the information given by the analyzeDirectory function to make batches of images to load
-        Returns: Batches of images as their file location (Doesn't load the image data into memory since that would defeat its purpose!)
-        """
-        pass
+            for rot in rotlist:
+                auglist.append(rot)
+                originalList[idxgrand].append(rot)
+                shiftRatios = generateUniqueRandomRatios(5, 0.4)
+                brightnessRatios = generateUniqueRandomRatios(10, 0.75)
+                saltPepperNoiseRatios = generateUniqueRandomRatios(8, 0.25, decimals=3, onlyPositive=True)
+                zoomRatios = [0.5 for i in range(8)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
+                channelShiftRatios = generateUniqueRandomRatios(10, 0.15, decimals=3, onlyPositive=True)
+                speckleNoiseRatios = generateUniqueRandomRatios(3, 0.05, decimals=5, onlyPositive=True)
 
-    @staticmethod
-    def process(path='..\\images', options={'imageProcessing': defaultImageProcessingOptions}):
-        """
-        Processes all images inside the given directory. 
-        Function expects to find different images of each class to classify in its own subdirectory and will generate new subdirectories for the new images
-        """
+                auglist.extend(verticalShifts(rot, shiftRatios))
+                auglist.extend(horizontalShifts(rot, shiftRatios))
 
-        relImgPath = os.path.join("data", "images", "original")
-        imgPaths = []
-
-        grandlist = [[], [], [], []]
-        originalList = [[], [], [], []]
-        idxgrand = 0
-
-        for dirpath, dirnames, filenames in os.walk(relImgPath):     
-            if dirnames:          
-                classes = {}
-                for index, name in enumerate(dirnames):
-                    classes[name]=index
-            for filename in filenames:# [f for f in filenames if f.endswith(suportedImgFomats)]:
-                path = os.path.join(dirpath, filename)
-                augpath = path.replace("original", "augmented")
-
-                image = cv2.imread(path, cv2.COLOR_BGR2RGB)
-                auglist = []
-                image = resizeAndPad(image, (32, 32))
-                auglist.append(image)
-                originalList[idxgrand].append(image)
-                auglist.append(cv2.flip(image, 0))
-                auglist.append(cv2.flip(image, 1))
-                #ratios = generateUniqueRandomRatios(15, 0.5)
+                for ratio in brightnessRatios:
+                    auglist.append(brightness(rot, ratio))
                 
-                numRotations = 12
-                rotlist = rotations(image, numRotations)
+                for ratio in saltPepperNoiseRatios:
+                    auglist.append(noise_sp(rot, ratio))
 
-                for rot in rotlist:
-                    auglist.append(rot)
-                    shiftRatios = generateUniqueRandomRatios(5, 0.4)
-                    brightnessRatios = generateUniqueRandomRatios(10, 0.4)
-                    saltPepperNoiseRatios = generateUniqueRandomRatios(8, 0.25, decimals=4, onlyPositive=True)
-                    zoomRatios = [0.5 for i in range(15)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
-                    channelShiftRatios = generateUniqueRandomRatios(15, 0.15, decimals=3, onlyPositive=True)
-                    speckleNoiseRatios = generateUniqueRandomRatios(8, 0.05, decimals=5, onlyPositive=True)
+                for ratio in zoomRatios:
+                    auglist.append(zoom(rot, ratio))
 
-                    auglist.extend(verticalShifts(rot, shiftRatios))
-                    auglist.extend(horizontalShifts(rot, shiftRatios))
+                for ratio in channelShiftRatios:
+                    auglist.append(channel_shift(rot, ratio))
 
-                    for ratio in brightnessRatios:
-                        auglist.append(brightness(rot, ratio))
-                    
-                    for ratio in saltPepperNoiseRatios:
-                        auglist.append(noise_sp(rot, ratio))
+                for ratio in speckleNoiseRatios:
+                    auglist.append(noise_speckle(rot, ratio))              
 
-                    for ratio in zoomRatios:
-                        auglist.append(zoom(rot, ratio))
+                grandlist[idxgrand].extend(auglist)
+                
+        if len(filenames) > 0:
+            grandlist[idxgrand] = np.array(grandlist[idxgrand])
+            originalList[idxgrand] = np.array(originalList[idxgrand])
+            idxgrand += 1
 
-                    for ratio in channelShiftRatios:
-                        auglist.append(channel_shift(rot, ratio))
-
-                    for ratio in speckleNoiseRatios:
-                        auglist.append(noise_speckle(rot, ratio))              
-
-                    grandlist[idxgrand].extend(auglist)
-                    
-            if len(filenames) > 0:
-                grandlist[idxgrand] = np.array(grandlist[idxgrand])
-                originalList[idxgrand] = np.array(originalList[idxgrand])
-                idxgrand += 1
-
-        grandlist = np.array(grandlist)
-        originalList = np.array(originalList)
-        with open(r'data/images/augmented/augmentation.npy', 'wb') as f:
-            pickle.dump(grandlist, f, protocol=4)
-        #np.save(r'data/images/augmented/augmentation.npy', grandlist, allow_pickle=True)
-        np.save(r'data/images/augmented/original.npy', originalList, allow_pickle=True)                          
-        
-
-    pass
+    grandlist = np.array(grandlist)
+    originalList = np.array(originalList)
+    with open(r'data/images/augmented/augmentation.npy', 'wb') as f:
+        pickle.dump(grandlist, f, protocol=4)
+    #np.save(r'data/images/augmented/augmentation.npy', grandlist, allow_pickle=True)
+    np.save(r'data/images/augmented/original.npy', originalList, allow_pickle=True)                          
 
 def resizeAndPad(img, size, padColor=0):
     """
