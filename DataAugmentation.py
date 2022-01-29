@@ -54,7 +54,6 @@ def process(image_size=32):
             image = cv2.imread(path, cv2.COLOR_BGR2RGB)
             auglist = []
             image = resizeAndPad(image, (image_size, image_size))
-            auglist.append(image)
             originalList[idxgrand].append(image)
             auglist.append(cv2.flip(image, 0))
             auglist.append(cv2.flip(image, 1))
@@ -106,9 +105,6 @@ def process(image_size=32):
     np.save(r'data/images/augmented/original.npy', originalList, allow_pickle=True)                          
 
 def resizeAndPad(img, size, padColor=0):
-    """
-    https://stackoverflow.com/questions/44720580/resize-image-canvas-to-maintain-square-aspect-ratio-in-python-opencv
-    """
     h, w = img.shape[:2]
     sh, sw = size
 
