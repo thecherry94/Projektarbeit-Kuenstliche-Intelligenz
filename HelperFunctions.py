@@ -6,6 +6,20 @@ from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_sc
 
 import DecisionTree as dt
 
+def load_images(path):
+    relImgPath = path
+
+    imgPaths = []
+    for dirpath, dirnames, filenames in os.walk(relImgPath):
+        if dirnames:
+            classes = {}
+            for index, name in enumerate(dirnames):
+                classes[name]=index
+        for filename in filenames:# [f for f in filenames if f.endswith(suportedImgFomats)]:
+            imgPaths.append(os.path.join(dirpath, filename))
+    
+    return (imgPaths, classes)
+
 def extract_features(path):
     relImgPath = path
 
