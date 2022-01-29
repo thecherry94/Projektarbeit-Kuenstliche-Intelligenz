@@ -6,6 +6,8 @@ from math import sqrt
 from math import exp
 from math import pi
 
+import modules.dataframe_management as dm
+
 def gaussian_probability(x, mean, std):
     """
     Probability density function of a Gaussian Distribution.
@@ -68,4 +70,32 @@ def class_probabilities(row, mean_std_nums):
             
     return probabilities
 
+def predict(X_test, data_train):
+    """
+    Predicts the classes according to the Naive Bayes Classifier.
 
+    Parameters
+    ----------
+    X_test : pandas.core.frame.DataFrame
+        DataFrame containing the features of objects to be detected. One row
+        of features equals one object.
+    data_train : pandas.core.frame.DataFrame
+        DataFrame containing features of objects and their classes 
+        respectively.
+
+    Returns
+    -------
+    predictions : list
+        List of predicted class indices for every row of X_test.
+
+    """
+    msn = dm.get_mean_std_num_per_class(data_train) 
+    
+    predictions = list()
+    for i in range(len(X_test.index)):
+        probabilities = class_probabilities(X_test.iloc[i,:], msn)
+        pred = max(probabilities, key=probabilities.get) 
+        predictions.append(pred)
+    
+    return predictions
+    
