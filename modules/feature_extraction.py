@@ -298,7 +298,7 @@ def display_image(img, title="image", destroy=True):
         cv2.destroyAllWindows()
         
         
-def extract_features(imgpaths, classes, display_imgs=False, imgs2show=["original", "prepared", "canny", "canny closed gaps", "max area contour", "harris", "shi-tomasi"], show_all=False): 
+def extract_features(imgpaths, classes, display_imgs=False, imgs2show=["original", "prepared", "canny", "canny closed gaps", "contours", "max area contour", "harris", "shi-tomasi"]):#, show_all=False): 
     global images
     
     features = ["Relative Image Path",
@@ -310,9 +310,9 @@ def extract_features(imgpaths, classes, display_imgs=False, imgs2show=["original
            "Perimeter Area Ratio"]
     df = pd.DataFrame(columns=features)
     
-    show_img = 1
-    if not show_all:
-        show_img = len(imgpaths)//3 
+#     show_img = 1
+#     if not show_all:
+#         show_img = len(imgpaths)//3 
     
     for i, path in enumerate(imgpaths):
         # Extract features and save them in a row of DataFrame df
@@ -334,7 +334,7 @@ def extract_features(imgpaths, classes, display_imgs=False, imgs2show=["original
         
         # Potentially show the images in different stages of the extraction progress
         if display_imgs:
-            if not i%show_img:
+            if i==1:#not i%show_img:
                 for img_name in imgs2show[:-1]:
                     display_image(images[img_name], title=img_name, destroy=False)
                 display_image(images[imgs2show[-1]], title=imgs2show[-1])

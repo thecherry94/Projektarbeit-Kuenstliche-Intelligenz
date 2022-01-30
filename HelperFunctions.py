@@ -74,11 +74,10 @@ def process_feature_dataframe(df):
 
     return df
 
-def get_scores(y_test, y_pred, y_proba=None):
+def get_scores(y_test, y_pred):
     accuracy = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred, average='weighted')
-    loss = log_loss(y_test, y_proba) if y_proba != None else -1
     recall = recall_score(y_test, y_pred, average='weighted')
     f1 = f1_score(y_test, y_pred, average='weighted')
 
-    return f"Accuracy:\t{accuracy}\nPrecision:\t{precision}\nLoss:\t\t{loss}\nRecall:\t\t{recall}\nF1-Score:\t{f1}"
+    return f"Accuracy:\t{accuracy}\nPrecision:\t{precision}\nRecall:\t\t{recall}\nF1-Score:\t{f1}"
