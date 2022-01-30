@@ -4,6 +4,9 @@ import numpy as np
 import random
 import pickle
 
+def normalizeImage(img):
+    return cv2.normalize(img, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+
 def trainTestSplit(data, labels, ratio):
     return ((data[:int(len(data)*ratio)], labels[:int(len(data)*ratio)]), (data[int(len(data)*ratio):], labels[int(len(data)*ratio):]))
 
@@ -65,11 +68,11 @@ def process(image_size=32):
             for rot in rotlist:
                 auglist.append(rot)
                 originalList[idxgrand].append(rot)
-                shiftRatios = generateUniqueRandomRatios(5, 0.4)
+                shiftRatios = generateUniqueRandomRatios(5, 0.3)
                 brightnessRatios = generateUniqueRandomRatios(10, 0.75)
                 saltPepperNoiseRatios = generateUniqueRandomRatios(8, 0.25, decimals=3, onlyPositive=True)
                 zoomRatios = [0.5 for i in range(8)] #generateUniqueRandomRatios(10, 0.8, decimals=2, onlyPositive=True)
-                channelShiftRatios = generateUniqueRandomRatios(10, 0.15, decimals=3, onlyPositive=True)
+                channelShiftRatios = generateUniqueRandomRatios(10, 0.2, decimals=3, onlyPositive=True)
                 speckleNoiseRatios = generateUniqueRandomRatios(3, 0.05, decimals=5, onlyPositive=True)
 
                 auglist.extend(verticalShifts(rot, shiftRatios))
