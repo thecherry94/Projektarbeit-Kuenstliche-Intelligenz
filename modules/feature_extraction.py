@@ -3,9 +3,13 @@
 This file provides functions to extract features out of object images for 
 classification and save them in a csv file.
 """
-import numpy as np
-import cv2 
 import math
+import os
+
+import numpy as np
+import pandas as pd
+
+import cv2 
 from imutils import perspective
 
 
@@ -292,4 +296,48 @@ def display_image(img, title="image", destroy=True):
     
     if destroy:
         cv2.destroyAllWindows()
+        
+        
+def extract_features(imgpaths, classes, display_imgs=False, imgs2show=["original", "prepared", "canny", "canny closed gaps", "max area contour", "harris", "shi-tomasi"], show_all=False): 
+    global images
+    
+    features = ["Relative Image Path",
+           "Class Name",
+           "Class Index",
+           "Aspect Ratio",
+           "Number of Corners (Harris)",
+           "Number of Corners (Shi-Tomasi)",
+           "Perimeter Area Ratio"]
+    df = pd.DataFrame(columns=features)
+    
+    show_img = 1
+    if not show_all:
+        show_img = len(imgpaths)//3 
+    
+    for i, path in enumerate(imgpaths):
+        # Extract features and save them in a row of DataFrame df
+        c = path.split(os.sep)[-2]
+        img = prepared_image(path)
+        row = []
+        row.append(path)
+        row.append(c) 
+        row.append(float(classes[c]))
+        row.append(aspect_ratio(img)) 
+        row.append(float(num_corners(img, detector="harris")))
+        row.append(float(num_corners(img, detector="shi-tomasi")))
+        row.append(perimeter_area_ratio(img))
+        row = pd.Series(row, index=features)
+        df = df.append(row, ignore_index=True)
+        
+        # User feedback about the progress
+        print(str(format((100./len(imgpaths))*i, ".2f"))+" %", end="\r")
+        
+        # Potentially show the images in different stages of the extraction progress
+        if display_imgs:
+            if not i%show_img:
+                for img_name in imgs2show[:-1]:
+                    display_image(images[img_name], title=img_name, destroy=False)
+                display_image(images[imgs2show[-1]], title=imgs2show[-1])
+                
+    return df
     
